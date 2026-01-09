@@ -92,8 +92,8 @@ http://localhost:5000
 ## Dosya Yapısı
 
 ```
-├── egitim_scripti.py
-├── web_motoru.py
+├── mleğitim.py
+├── webmotor.py
 ├── templates/
 │   └── index.html
 ├── modeller/
