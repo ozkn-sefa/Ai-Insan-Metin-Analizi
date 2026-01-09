@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Model Seçim Paneli</title>
+<style>
+:root{
+  --bg:#0f172a; --card:#111827; --panel:#1f2937; --border:#374151;
+  --text:#e5e7eb; --muted:#9ca3af; --ai:#22c55e; --human:#38bdf8;
+}
+*{box-sizing:border-box; transition:.2s ease}
+html,body{
+  margin:0; height:100%;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+  background:var(--bg); color:var(--text);
+}
+.app{min-height:100svh; display:flex; flex-direction:column;}
+
+/* HEADER */
+header{
+  padding:14px 20px;
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:10;
+  padding-top:calc(14px + env(safe-area-inset-top));
+}
+header h1{margin:0; font-size:16px; letter-spacing:.5px}
+
+/* LAYOUT – DESKTOP */
+main{
+  flex:1;
+  display:grid;
+  grid-template-columns: 1fr 400px;
+  gap:16px;
+  padding:16px;
+  min-height:0;
+}
+
+.left{display:flex; flex-direction:column; gap:12px; min-height:0;}
+.right{display:flex; flex-direction:column; gap:12px; overflow:auto;}
+
+/* INPUT */
+textarea{
+  flex:1;
+  resize:none;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px;
+  color:var(--text);
+  font-size:15px;
+  line-height:1.6;
+}
+textarea:focus{
+  outline:none;
+  border-color:var(--ai);
+  box-shadow:0 0 0 2px rgba(34,197,94,.2);
+}
+
+.controls{display:flex; gap:10px}
+.btn{
+  flex:1;
+  border:0;
+  border-radius:12px;
+  padding:14px;
+  font-weight:700;
+  cursor:pointer;
+}
+.btn-primary{background:var(--ai); color:#022c22}
+.btn-secondary{background:var(--panel); color:var(--text); border:1px solid var(--border)}
+.btn:disabled{opacity:.6}
+
+/* CARDS */
+.card{
+  background:var(--card);
+  border-radius:14px;
+  padding:16px;
+  border:1px solid var(--border);
+}
+.chart-box{text-align:center}
+
+.circle{
+  width:160px; height:160px;
+  margin:0 auto;
+  border-radius:50%;
+  background:conic-gradient(#374151 0deg,#374151 360deg);
+  display:flex; align-items:center; justify-content:center;
+}
+.circle .inner{
+  width:120px; height:120px;
+  background:var(--card);
+  border-radius:50%;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+}
+.circle span{font-size:28px; font-weight:800}
+.circle small{color:var(--muted); font-size:12px; font-weight:600}
+
+.model-list{display:flex; flex-direction:column; gap:8px; margin-top:10px}
+.model-option{
+  background:var(--panel);
+  border:1px solid var(--border);
+  padding:12px 14px;
+  border-radius:10px;
+  display:flex; justify-content:space-between; align-items:center;
+  cursor:pointer;
+}
+.model-option.active{border-color:var(--ai); background:rgba(34,197,94,.06)}
+.model-option .name{font-weight:600; font-size:14px}
+.model-option .val{font-size:12px; color:var(--muted)}
+
+/* ===================== */
+/* MOBİL + TABLET */
+/* ===================== */
+@media (max-width: 900px){
+  main{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "input"
+      "results";
+    padding:12px;
+  }
+  .left{grid-area:input}
+  .right{grid-area:results}
+}
+
+@media (max-width: 480px){
+  header h1{font-size:15px}
+  textarea{font-size:14px; padding:14px}
+  .controls{flex-direction:column}
+  .btn{padding:16px}
+  .circle{width:140px; height:140px}
+  .circle .inner{width:105px; height:105px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header><h1>Çoklu Metin Analiz Paneli</h1></header>
+<main>
+
+<!-- METİN GİRİŞİ (ÜST) -->
+<section class="left">
+  <textarea id="textInput" placeholder="Analiz edilecek içeriği buraya yazın..."></textarea>
+  <div class="controls">
+    <button class="btn btn-primary" id="analyzeBtn">İÇERİĞİ TARAT</button>
+    <button class="btn btn-secondary" id="clearBtn">Temizle</button>
+  </div>
+</section>
+
+<!-- SONUÇLAR (ALT) -->
+<section class="right">
+  <div class="card chart-box">
+    <div id="selectedModelName" style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:700;letter-spacing:1px">SEÇİLEN: -</div>
+    <div class="circle" id="circle">
+      <div class="inner">
+        <span id="percentDisplay">0%</span>
+        <small id="decisionDisplay">Bekleniyor</small>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h4 style="margin:0 0 8px;font-size:14px">Model Seçimi ve Sonuçlar</h4>
+    <div id="modelList" class="model-list">
+      <div style="color:var(--muted); font-size:13px; text-align:center; padding:16px">Analiz sonuçları burada listelenecek.</div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+let analysisData=null;
+const analyzeBtn=document.getElementById('analyzeBtn');
+const modelList=document.getElementById('modelList');
+const percentDisplay=document.getElementById('percentDisplay');
+const decisionDisplay=document.getElementById('decisionDisplay');
+const selectedModelName=document.getElementById('selectedModelName');
+const circle=document.getElementById('circle');
+
+analyzeBtn.onclick=async()=>{
+  const text=document.getElementById('textInput').value.trim();
+  if(!text) return alert('Lütfen bir metin girin.');
+  analyzeBtn.disabled=true; analyzeBtn.innerText='HESAPLANIYOR...';
+  try{
+    const res=await fetch('/api/analyze',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text})
+    });
+    analysisData=await res.json(); buildModelList();
+  }catch{alert('Sunucuya bağlanılamadı!');}
+  finally{analyzeBtn.disabled=false; analyzeBtn.innerText='İÇERİĞİ TARAT';}
+};
+
+function buildModelList(){
+  modelList.innerHTML='';
+  const options=[
+    {name:'GENEL ORTALAMA',prob:analysisData.avg_ai_prob},
+    ...Object.entries(analysisData.results).map(([n,p])=>({name:n,prob:p}))
+  ];
+  options.forEach((opt,i)=>{
+    if(opt.prob==null) return;
+    const item=document.createElement('div');
+    item.className='model-option';
+    const label=opt.prob>=.5?'AI':'İnsan';
+    const val=opt.prob>=.5?(opt.prob*100):(1-opt.prob)*100;
+    item.innerHTML=`<span class="name">${opt.name}</span><span class="val">%${val.toFixed(1)} ${label}</span>`;
+    item.onclick=()=>selectModel(opt.name,opt.prob,item);
+    modelList.appendChild(item);
+    if(i===0) selectModel(opt.name,opt.prob,item);
+  });
+}
+
+function selectModel(name,prob,el){
+  document.querySelectorAll('.model-option').forEach(e=>e.classList.remove('active'));
+  if(el) el.classList.add('active');
+  let perc,dec,color;
+  if(prob>=.5){perc=(prob*100).toFixed(1); dec='YAPAY ZEKA'; color='var(--ai)';}
+  else{perc=((1-prob)*100).toFixed(1); dec='İNSAN'; color='var(--human)';}
+  selectedModelName.innerText='SEÇİLEN: '+name.toUpperCase();
+  percentDisplay.innerText='%'+perc;
+  decisionDisplay.innerText=dec;
+  decisionDisplay.style.color=color;
+  const deg=perc*3.6;
+  circle.style.background=`conic-gradient(${color} 0deg, ${color} ${deg}deg, #374151 ${deg}deg 360deg)`;
+}
+
+document.getElementById('clearBtn').onclick=()=>{
+  document.getElementById('textInput').value='';
+  modelList.innerHTML='<div style="color:var(--muted); font-size:13px; text-align:center; padding:16px">Analiz sonuçları burada listelenecek.</div>';
+  percentDisplay.innerText='0%';
+  decisionDisplay.innerText='BEKLENİYOR';
+  decisionDisplay.style.color='var(--muted)';
+  selectedModelName.innerText='SEÇİLEN: -';
+  circle.style.background='conic-gradient(#374151 0deg,#374151 360deg)';
+};
+</script>
+</body>
+</html>
