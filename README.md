@@ -64,7 +64,7 @@ pip install pandas torch sentence-transformers scikit-learn joblib flask flask-c
 Web arayüzünü başlatmadan önce modellerin eğitilmesi gerekir.
 
 ```bash
-python egitim_scripti.py
+python mleğitim.py
 ```
 
  **Not:**
@@ -78,7 +78,7 @@ Bu işlem tamamlandığında `modeller/` klasörü içinde aşağıdaki dosyalar
 ###  Web Sunucusunun Başlatılması
 
 ```bash
-python web_motoru.py
+python webmotor.py
 ```
 
 Sunucu çalıştıktan sonra tarayıcıdan aşağıdaki adrese gidin:
