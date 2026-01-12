@@ -148,3 +148,9 @@ inceleyebilirsiniz.
 ## Özet
 
 Bu proje; **NLP**, **derin öğrenme**, **backend–frontend entegrasyonu** ve **model karşılaştırma** süreçlerini kapsayan, akademik ve endüstriyel kullanıma uygun kapsamlı bir AI uygulamasıdır.
+
+## Uygulama içi görüntüler
+<img width="1918" height="866" alt="Ekran görüntüsü 2025-12-19 105129" src="https://github.com/user-attachments/assets/5bbb119d-f0fa-4bb4-96c0-87b541aa544b" />
+<img width="1913" height="865" alt="Ekran görüntüsü 2025-12-19 105204" src="https://github.com/user-attachments/assets/21601edd-c0a2-4b8e-bf5d-e711da249bd3" />
+<img width="1918" height="873" alt="Ekran görüntüsü 2025-12-19 105240" src="https://github.com/user-attachments/assets/ac909746-36f7-41c6-ad8c-e2005a308c7d" />
+
